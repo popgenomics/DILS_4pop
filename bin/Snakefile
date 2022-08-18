@@ -1,0 +1,89 @@
+binpath="/home/croux/Documents/quentin_rougemont/4pop/reabc/example/bin/dev"
+datapath="/home/croux/Documents/zoe/DILS/4pop_v1"
+
+# parameters
+## input file
+inputFile="/home/croux/Documents/zoe/data/RNAseq_nucl.fasta"
+region="coding"
+
+## number of simulations and iterations
+nMultilocus=1000
+nIteration=5
+
+## mutation
+mutation="nSNPs" # can be 'mu' or 'nSNPs'
+
+## filtering
+nameA="E1"
+nameB="W3"
+nameC="W1"
+nameD="W2"
+maxN=0.5
+nMin=8
+Lmin=200
+
+## bpfile
+mu=0.00000000731
+rec=0.00000000731
+Nref=100000
+
+## prior distributions
+N_bound_min=0
+N_bound_max=10
+T_bound_min=1
+T_bound_max=10
+M_bound_min=0.4
+M_bound_max=40
+shape_bound_min=1
+shape_bound_max=20
+
+# models: topo1 (A;((B;C); D)), topo2 (A;(B;(C;D))) or topo3 ((A;B);(C;D))
+LISTE_MODELES=["topo2"]
+
+## migration relationships
+LISTE_MIGAB=['0', '1']
+LISTE_MIGAC=['0', '1']
+LISTE_MIGAD=['0', '1']
+LISTE_MIGBC=['0', '1']
+LISTE_MIGBD=['0', '1']
+LISTE_MIGCD=['0', '1']
+
+ITERATIONS=range(5)
+
+######################
+# prepare input files
+
+rule all:
+	input:
+		"end_of_test.txt"
+
+rule makeInputFiles:
+	input:
+		inputFile
+	output:
+		"bpfile",
+		"ABCstat.txt",
+		"general_infos.txt"
+	shell:
+		"python3 {binpath}/fasta2bpfile.py binpath={binpath} simulationpath={datapath} datapath={datapath} fastafile={inputFile} spA={nameA} spB={nameB} spC={nameC} spD={nameD} maxN={maxN} nMin={nMin} region={region} Lmin={Lmin} mu={mu} rec={rec} Nref={Nref}"
+
+rule simulations:
+	input:
+		bpfile="bpfile"
+	output:
+		"{model}_{AB}_{AC}_{AD}_{BC}_{BD}_{CD}_{iteration}/ABCstat.txt",
+		"{model}_{AB}_{AC}_{AD}_{BC}_{BD}_{CD}_{iteration}/priorfile.txt"
+	shell:
+		"echo {wildcards.model} {wildcards.AB} {wildcards.AC} {wildcards.AD} {wildcards.BC} {wildcards.BD} {wildcards.CD} >> liste_models.txt; "
+		"simulationpath={wildcards.model}_{wildcards.AB}_{wildcards.AC}_{wildcards.AD}_{wildcards.BC}_{wildcards.BD}_{wildcards.CD}_{wildcards.iteration}; "
+		"python3 {binpath}/simulations_4pop.py binpath={binpath} datapath={datapath} simulationpath=$simulationpath model={wildcards.model} nMultilocus={nMultilocus} mutation={mutation} AB={wildcards.AB} AC={wildcards.AC} AD={wildcards.AD} BC={wildcards.BC} BD={wildcards.BD} CD={wildcards.CD} N={N_bound_min} N={N_bound_max} T={T_bound_min} T={T_bound_max} M={M_bound_min} M={M_bound_max} shape={shape_bound_min} shape={shape_bound_max}"
+
+rule treatSimulations:
+	input:
+		stats=expand("{model}_{AB}_{AC}_{AD}_{BC}_{BD}_{CD}_{iteration}/ABCstat.txt", model=LISTE_MODELES, AB=LISTE_MIGAB, AC=LISTE_MIGAC, AD=LISTE_MIGAD, BC=LISTE_MIGBC, BD=LISTE_MIGBD, CD=LISTE_MIGCD, iteration=ITERATIONS),
+		prior=expand("{model}_{AB}_{AC}_{AD}_{BC}_{BD}_{CD}_{iteration}/priorfile.txt", model=LISTE_MODELES, AB=LISTE_MIGAB, AC=LISTE_MIGAC, AD=LISTE_MIGAD, BC=LISTE_MIGBC, BD=LISTE_MIGBD, CD=LISTE_MIGCD, iteration=ITERATIONS)
+	output:
+		"end_of_test.txt"
+	shell:
+		"echo pouet > {output}"
+
