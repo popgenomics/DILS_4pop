@@ -1,18 +1,17 @@
-# DILS_4pop  
 Pipeline using snakemake to perform demographic inferences in 4-population models. Three topologies are possible as well as different migration relationships making a maximum of 768 comparable models, depending on the user's specifications.  
   
-## dependencies  
+# dependencies  
 - pypy ([fast implementation of Python](https://www.pypy.org/))  
 - snakemake ([installation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html))  
 - numpy (Python library)  
 - biopython (Python library)  
 
-## get the pipeline  
+# get the pipeline  
 ```
 git clone https://github.com/popgenomics/DILS_4pop
 ```
 
-## Snakefile  
+# Snakefile  
 For the time being, all the specifications of the analysis must be indicated in the Snakefile. The variables to be filled in are:  
 - binpath: path to binaries for ABC inferences  
 - datapath: path to directory where inferences will be performed  
@@ -37,7 +36,7 @@ prior distributions in coalescent units:
 - shape_bound_min=1 # shape parameters of the Beta distributions  
 - shape_bound_max=20  
 
-## example (dry run)  
+# example (dry run)  
 ```
 cd DILS_4pop/example/
 mkdir analysis
