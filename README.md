@@ -1,7 +1,7 @@
 - [dependencies](#dependencies)
 - [get the pipeline](#get-the-pipeline)
 - [Snakefile](#snakefile)
-- [example (dry run)](#example--dry-run-)
+- [example](#example)
 
 Pipeline using snakemake to perform demographic inferences in 4-population models. Three topologies are possible as well as different migration relationships making a maximum of 768 comparable models, depending on the user's specifications.  
   
@@ -41,7 +41,8 @@ prior distributions in coalescent units:
 - shape_bound_min=1 # shape parameters of the Beta distributions  
 - shape_bound_max=20  
 
-# example (dry run)  
+# example  
+Short example (dry run).  
 ```
 cd DILS_4pop/example/
 mkdir analysis
