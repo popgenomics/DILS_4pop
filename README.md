@@ -6,7 +6,7 @@
 Pipeline using snakemake to perform demographic inferences in 4-population models. Three topologies are possible as well as different migration relationships making a maximum of 768 comparable models, depending on the user's specifications.  
   
 # dependencies  
-###### R libraries
+### R libraries
 - abcrf  
 - data.table  
 - FactoMineR  
@@ -21,11 +21,11 @@ for(library in c('abcrf', 'data.table', 'FactoMineR', 'ggpubr', 'viridis')){
 }
 ```
   
-###### Python libraries  
+### Python libraries  
 - numpy (Python library)  
 - biopython (Python library)  
   
-###### others  
+### others  
 - pypy ([fast implementation of Python](https://www.pypy.org/))  
 - snakemake ([installation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html))  
 - java (>  openjdk 11.0.16 2022-07-19)  
