@@ -26,9 +26,9 @@ for(library in c('abcrf', 'data.table', 'FactoMineR', 'ggpubr', 'viridis')){
 - biopython (Python library)  
   
 ### others  
-- pypy ([fast implementation of Python](https://www.pypy.org/))  
-- snakemake ([installation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html))  
-- java (>  openjdk 11.0.16 2022-07-19)  
+- pypy ([fast implementation of Python](https://www.pypy.org/), works with version: Python 3.6.9  [PyPy 7.3.1 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)])  
+- snakemake ([installation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html), works with version: 6.15.1)  
+- java (works with version: openjdk 11.0.16 2022-07-19)  
   
 # get the pipeline  
 ```
