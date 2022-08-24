@@ -58,6 +58,11 @@ The msms binary is located in:
 Please, adapt the **line 4** of bin/Snakefile to your own system. This is simply the path to the scripts deposited in DILS_4pop/bin:  
 - binpath: path to binaries for ABC inferences  
   
+Currently, the line you should see and modify is:
+```
+binpath="/home/croux/Programmes/DILS_4pop/bin" # binpath: path to binaries for ABC inferences
+```
+   
 # config file  
 DILS requires a second input file (in addition to the fasta) to be executed. The second file, in yaml format, contains various information crucial to the analysis.  
 Here is an example with **config.yaml**    
