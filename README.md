@@ -7,12 +7,12 @@ Pipeline using snakemake to perform demographic inferences in 4-population model
   
 # dependencies  
 ### R libraries
-- abcrf  
-- data.table  
-- FactoMineR  
-- tidyverse  
-- ggpubr  
-- viridis  
+- abcrf (works with version: 1.9)  
+- data.table (works with version: 1.14.2)  
+- FactoMineR (works with version: 2.4)  
+- tidyverse (works with version: 1.3.2)  
+- ggpubr (works with version: 0.4.0)  
+- viridis (works with version: 0.6.2)  
   
 In a R terminal:  
 ```
@@ -22,13 +22,18 @@ for(library in c('abcrf', 'data.table', 'FactoMineR', 'ggpubr', 'viridis')){
 ```
   
 ### Python libraries  
-- numpy (Python library)  
-- biopython (Python library)  
+- numpy (works with version: 1.21.5)  
+- biopython (works with version: 1.79)  
   
 ### others  
 - pypy ([fast implementation of Python](https://www.pypy.org/), works with version: Python 3.6.9  [PyPy 7.3.1 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)])  
 - snakemake ([installation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html), works with version: 6.15.1)  
 - java (works with version: openjdk 11.0.16 2022-07-19)  
+- msnsam  
+- msms  
+  
+The msms binary is located in:
+> bin/msms3.2rc-b163.jar
   
 # get the pipeline  
 ```
