@@ -55,12 +55,12 @@ The msms binary is located in:
 > bin/msms3.2rc-b163.jar
   
 # Snakefile  
-For the time being, all the specifications of the analysis must be indicated in the Snakefile. The variables to be filled in are:  
+Please, adapt the **line 4** of bin/Snakefile to your own system. This is simply the path to the scripts deposited in DILS_4pop/bin:  
 - binpath: path to binaries for ABC inferences  
   
 # config file  
 DILS requires a second input file (in addition to the fasta) to be executed. The second file, in yaml format, contains various information crucial to the analysis.  
-Here is an example with config.yaml    
+Here is an example with **config.yaml**    
 ```
 inputFile: /home/croux/Documents/zoe/data/RNAseq_nucl.fasta # full pathway to the input file (fasta format)
 datapath: /home/croux/Documents/zoe/DILS/4pop_v1 # full pathway to the directory where the analysis will be performed, i.e, where the results will be stored

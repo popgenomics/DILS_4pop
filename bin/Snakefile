@@ -1,6 +1,13 @@
-# pathways
-## binpath: path to binaries for ABC inferences
-binpath="/home/croux/Programmes/DILS_4pop/bin"
+####################################################################
+############## The only line that needs to be adapted ##############
+####################################################################
+binpath="/home/croux/Programmes/DILS_4pop/bin" # binpath: path to binaries for ABC inferences
+
+
+#######################################################################################################
+############## You can change everything underneath, but I don't guarantee it will work. ##############
+#######################################################################################################
+
 
 ## datapath: path to directory where inferences will be performed
 datapath = config['datapath'] #datapath="/home/croux/Programmes/DILS_4pop/example/analysis"
