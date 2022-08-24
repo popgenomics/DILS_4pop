@@ -5,7 +5,14 @@
 
 Pipeline using snakemake to perform demographic inferences in 4-population models. Three topologies are possible as well as different migration relationships making a maximum of 768 comparable models, depending on the user's specifications.  
   
+# get the pipeline  
+```
+git clone https://github.com/popgenomics/DILS_4pop
+```  
+
 # dependencies  
+Like many modern bioinformatics tools, DILS relies heavily on external libraries and programs developed by real computer scientists.  Please install them before running DILS:   
+ 
 ### R libraries
 - abcrf (works with version: 1.9)  
 - data.table (works with version: 1.14.2)  
@@ -39,14 +46,10 @@ cd bin/msnsam_src
 ln -s $PWD/msnsam ../msnsam
 ```  
   
+  
 The msms binary is located in:
 > bin/msms3.2rc-b163.jar
   
-# get the pipeline  
-```
-git clone https://github.com/popgenomics/DILS_4pop
-```
-
 # Snakefile  
 For the time being, all the specifications of the analysis must be indicated in the Snakefile. The variables to be filled in are:  
 - binpath: path to binaries for ABC inferences  
@@ -71,6 +74,39 @@ prior distributions in coalescent units:
 - M_bound_max=40  
 - shape_bound_min=1 # shape parameters of the Beta distributions  
 - shape_bound_max=20  
+  
+# config file  
+DILS requires a second input file (in addition to the fasta) to be executed. The second file, in yaml format, contains various information crucial to the analysis.  
+Here is an example with config.yaml    
+```
+inputFile: /home/croux/Documents/zoe/data/RNAseq_nucl.fasta # full pathway to the input file (fasta format)
+datapath: /home/croux/Documents/zoe/DILS/4pop_v1 # full pathway to the directory where the analysis will be performed, i.e, where the results will be stored
+region: coding
+nameA: E1
+nameB: W3
+nameC: W1
+nameD: W2
+maxN: 0.5
+nMin: 8
+Lmin: 200
+mu: 0.00000000731
+rec: 0.00000000731
+N_bound_min: 0  # effective population sizes
+N_bound_max: 10
+T_bound_min: 1 # time of demographic events
+T_bound_max: 10
+M_bound_min: 0.4 # migration rates in 4.N.m
+M_bound_max: 40
+shape_bound_min: 1 # shape parameters of the Beta distributions
+shape_bound_max: 20
+topologies: topo2 #topo1 or topo2 or topo3 or topo1,topo2 or topo1,topo3 or topo2,topo3 or topo1,topo2,topo3
+migAB: 0,1 #0 or 1 or 0,1
+migAC: 0
+migAD: 0
+migBC: 0,1
+migBD: 0
+migCD: 0
+```
 
 # example  
 Short example (dry run).  
@@ -80,4 +116,5 @@ mkdir analysis
 cd analysis
 snakemake -n -p -s ../../bin/Snakefile
 ```
-
+  
+Full run
