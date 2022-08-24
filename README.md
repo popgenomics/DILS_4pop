@@ -109,12 +109,16 @@ migCD: 0
 ```
 
 # example  
-Short example (dry run).  
+Short example (dry run):  
 ```
 cd DILS_4pop/example/
 mkdir analysis
 cd analysis
 snakemake -n -p -s ../../bin/Snakefile
 ```
-  
-Full run
+   
+Full run:  
+```
+
+```
+
