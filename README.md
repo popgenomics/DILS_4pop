@@ -32,6 +32,13 @@ for(library in c('abcrf', 'data.table', 'FactoMineR', 'ggpubr', 'viridis')){
 - msnsam  
 - msms  
   
+msnsam has to be compiled as follows:  
+```
+cd bin/msnsam_src
+./clms
+ln -s $PWD/msnsam ../msnsam
+```  
+  
 The msms binary is located in:
 > bin/msms3.2rc-b163.jar
   
