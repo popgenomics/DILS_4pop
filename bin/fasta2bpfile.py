@@ -167,10 +167,10 @@ for i in infile:
 	
 	data[gene][species].append(i.seq)
 
-outfile_infos = open('general_infos.txt', 'w')
+outfile_infos = open('{datapath}/general_infos.txt'.format(datapath=datapath), 'w')
 outfile_infos.write('gene\tcomment\tL\tL_valid\tnS\n')
 
-outfile_ms = open('observed_data.ms', 'w')
+outfile_ms = open('{datapath}/observed_data.ms'.format(datapath=datapath), 'w')
 outfile_ms.write('msnsam 4pop\n111 222 333\n\n')
 
 bpfile_header = "#Nref:{0}\tmu:{1}\tr:{2}\t".format(Nref, mu, rec)
@@ -246,7 +246,7 @@ outfile_infos.close()
 outfile_ms.close()
 
 bpfile_header += 'nLoci:{nLoci}'.format(nLoci=nRetainedLoci)
-bpfile = open('bpfile', 'w')
+bpfile = open('{datapath}/bpfile'.format(datapath=datapath), 'w')
 bpfile.write(bpfile_header.strip() + '\n')
 bpfile.write(bpfile_L1.strip() + '\n')
 bpfile.write(bpfile_L2.strip() + '\n')
@@ -260,7 +260,7 @@ bpfile.write(bpfile_L8.strip() + '\n')
 bpfile.close()
 
 ### get ABCstat.txt
-commande = 'cat observed_data.ms | pypy {binpath}/mscalc_4pop.py datapath={datapath} simulationpath={simulationpath}'.format(binpath=binpath, datapath=datapath, simulationpath=simulationpath)
+commande = 'cat {datapath}/observed_data.ms | pypy {binpath}/mscalc_4pop.py datapath={datapath} simulationpath={simulationpath}'.format(binpath=binpath, datapath=datapath, simulationpath=simulationpath)
 os.system(commande)
 
 

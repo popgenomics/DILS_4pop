@@ -57,6 +57,10 @@ for arg in sys.argv:
 		M_bound.append(float(tmp[1]))
 	if tmp[0]=='shape':
 		shape_bound.append(float(tmp[1]))
+	if tmp[0]=='target': # modelComp / posterior / opti1 / opti2 / opti3 / opti4 / opti5
+		target=tmp[1]
+	if tmp[0]=='posteriorFile': # name of the file containing estimated values (posterior or lower levels of optimization)
+		posteriorFile=tmp[1]
 
 if model==None:
 	print("ERROR: please specify a correct model (i.e model=topo1, model=topo2 or model=topo3)\n")
@@ -127,7 +131,7 @@ nLoci = len(tmp)
 infile.close()
 
 # commande for the simulation
-commande='python3 {binpath}/priorgen_4pop.py datapath={datapath} simulationpath={simulationpath} mutation={mutation} model={model} nMultilocus={nMultilocus} AB={AB} AC={AC} AD={AD} BC={BC} BD={BD} CD={CD} N={Nmin} N={Nmax} T={Tmin} T={Tmax} M={Mmin} M={Mmax} shape={shape_min} shape={shape_max} | {simulator} tbs {nSimulationsTot} {commandeMS} | pypy {binpath}/mscalc_4pop.py datapath={datapath} simulationpath={simulationpath}'.format(mutation=mutation, model=model, nMultilocus=nMultilocus, AB=AB, AC=AC, AD=AD, BC=BC, BD=BD, CD=CD, binpath=binpath, nSimulationsTot=nMultilocus*nLoci, commandeMS=commandeMS, datapath=datapath, Nmin=min(N_bound), Nmax=max(N_bound), Mmin=min(M_bound), Mmax=max(M_bound), Tmin=min(T_bound), Tmax=max(T_bound), shape_min=min(shape_bound), shape_max=max(shape_bound), simulationpath=simulationpath, simulator=simulator)
+commande='python3 {binpath}/priorgen_4pop.py datapath={datapath} simulationpath={simulationpath} mutation={mutation} model={model} nMultilocus={nMultilocus} AB={AB} AC={AC} AD={AD} BC={BC} BD={BD} CD={CD} N={Nmin} N={Nmax} T={Tmin} T={Tmax} M={Mmin} M={Mmax} shape={shape_min} shape={shape_max} target={target} posteriorFile={posteriorFile} | {simulator} tbs {nSimulationsTot} {commandeMS} | pypy {binpath}/mscalc_4pop.py datapath={datapath} simulationpath={simulationpath}'.format(mutation=mutation, model=model, nMultilocus=nMultilocus, AB=AB, AC=AC, AD=AD, BC=BC, BD=BD, CD=CD, binpath=binpath, nSimulationsTot=nMultilocus*nLoci, commandeMS=commandeMS, datapath=datapath, Nmin=min(N_bound), Nmax=max(N_bound), Mmin=min(M_bound), Mmax=max(M_bound), Tmin=min(T_bound), Tmax=max(T_bound), shape_min=min(shape_bound), shape_max=max(shape_bound), simulationpath=simulationpath, simulator=simulator, target=target, posteriorFile=posteriorFile)
 
 #print(commande)
 os.system(commande)
