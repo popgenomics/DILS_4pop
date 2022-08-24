@@ -33,7 +33,7 @@ help += "\t\033[1;32;40m#Thus, for all pairs ({pairs}), set to 0 if you want iso
 help += "\t\033[1;32;40mExample: ./priorgen_4pop.py datapath=/home/project simulationpath=/home/project/topo1_iteration123 mutation=mu model=topo1 nMultilocus=1000 AB=0 AC=0 AD=1 BC=1 BD=0 CD=1 N=0 N=10 T=0 T=10 M=0.4 M=8 shape=1 shape=20\033[0m\n"
 help += "\t\033[1;32;40mIsolation between A<->B, A<->C and B<->D, migration between A<->D, B<->C and C<->D \033[0m\n"
 help += "\t\033[1;32;40mBe sure that the pathway to simulationpath (where the simulations will be written) already exists\033[0m\n"
-help += "\t\033[1;32;40mThe arguments 'target' and 'posteriorFile' are optional. 'target' can take as values ['modelComp', 'posterior', 'opti1', 'opti2', 'opti3', 'opti4', 'opti5'] to define the purpose of the simulations. 'posteriorFile' is important only if 'target' defines one the five cycles of optimization.\033[0m\n"
+help += "\t\033[1;32;40mThe arguments 'target' and 'posteriorFile' are optional. 'target' can take as values ['modelComp', 'posterior', 'opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof'] to define the purpose of the simulations. 'posteriorFile' is important only if 'target' defines one the five cycles of optimization.\033[0m\n"
 
 
 if len(sys.argv) != 22:
@@ -147,7 +147,7 @@ if len(shape_bound)!=2:
 	sys.exit()
 
 # get the posterior of a previous estimate to optimize, just in case
-if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5']:
+if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof']:
 	posterior = {}
 	infile = open(posteriorFile, 'r')
 	tmp = infile.readline()
@@ -196,25 +196,45 @@ nsam_tot = [ nsamA[i] + nsamB[i] + nsamC[i] + nsamD[i] for i in range(nLoci) ]
 
 # param multilocus: values that will be printed in priorfile.txt
 ## N = N_pop_i / Nref
-if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5']:
-	N1 = [ posterior['N1'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	N2 = [ posterior['N2'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	N3 = [ posterior['N3'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	N4 = [ posterior['N4'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	Na = [ posterior['Na'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	if model == 'topo1':
-		Na_23 = [ posterior['Na_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		Na_24 = [ posterior['Na_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	if model == 'topo2':
-		Na_34 = [ posterior['Na_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		Na_24 = [ posterior['Na_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	if model == 'topo3':
-		Na_12 = [ posterior['Na_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		Na_34 = [ posterior['Na_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	
-	## factor of local reduction in Ne. Model of "background selection"
-	shape_N_a = [ posterior['shape_N_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	shape_N_b = [ posterior['shape_N_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof']:
+	if target == 'gof':
+		N1 = [ posterior['N1'] for i in range(nMultilocus) ]
+		N2 = [ posterior['N2'] for i in range(nMultilocus) ]
+		N3 = [ posterior['N3'] for i in range(nMultilocus) ]
+		N4 = [ posterior['N4'] for i in range(nMultilocus) ]
+		Na = [ posterior['Na'] for i in range(nMultilocus) ]
+		if model == 'topo1':
+			Na_23 = [ posterior['Na_23'] for i in range(nMultilocus) ]
+			Na_24 = [ posterior['Na_24'] for i in range(nMultilocus) ]
+		if model == 'topo2':
+			Na_34 = [ posterior['Na_34'] for i in range(nMultilocus) ]
+			Na_24 = [ posterior['Na_24'] for i in range(nMultilocus) ]
+		if model == 'topo3':
+			Na_12 = [ posterior['Na_12'] for i in range(nMultilocus) ]
+			Na_34 = [ posterior['Na_34'] for i in range(nMultilocus) ]
+		
+		## factor of local reduction in Ne. Model of "background selection"
+		shape_N_a = [ posterior['shape_N_a'] for i in range(nMultilocus) ]
+		shape_N_b = [ posterior['shape_N_b'] for i in range(nMultilocus) ]
+	else:
+		N1 = [ posterior['N1'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		N2 = [ posterior['N2'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		N3 = [ posterior['N3'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		N4 = [ posterior['N4'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		Na = [ posterior['Na'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		if model == 'topo1':
+			Na_23 = [ posterior['Na_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			Na_24 = [ posterior['Na_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		if model == 'topo2':
+			Na_34 = [ posterior['Na_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			Na_24 = [ posterior['Na_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		if model == 'topo3':
+			Na_12 = [ posterior['Na_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			Na_34 = [ posterior['Na_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		
+		## factor of local reduction in Ne. Model of "background selection"
+		shape_N_a = [ posterior['shape_N_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		shape_N_b = [ posterior['shape_N_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
 else:
 	N1 = uniform(low = min(N_bound), high = max(N_bound), size = nMultilocus)
 	N2 = uniform(low = min(N_bound), high = max(N_bound), size = nMultilocus)
@@ -238,96 +258,188 @@ else:
 	shape_N_b = uniform(low = min(shape_bound), high=max(shape_bound), size = nMultilocus)
 
 ## Migration rates
-if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5']:
-	if AB == '1':
-		M12 = [ posterior['M12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		M21 = [ posterior['M21'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M12_a = [ posterior['shape_M12_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M12_b = [ posterior['shape_M12_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M21_a = [ posterior['shape_M21_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M21_b = [ posterior['shape_M21_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	else:
-		M12 = [0]*nMultilocus
-		M21 = [0]*nMultilocus
-		shape_M12_a = [0]*nMultilocus
-		shape_M12_b = [0]*nMultilocus
-		shape_M21_a = [0]*nMultilocus
-		shape_M21_b = [0]*nMultilocus
+if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof']:
+	if target == 'gof':
+		if AB == '1':
+			M12 = [ posterior['M12'] for i in range(nMultilocus) ]
+			M21 = [ posterior['M21'] for i in range(nMultilocus) ]
+			shape_M12_a = [ posterior['shape_M12_a'] for i in range(nMultilocus) ]
+			shape_M12_b = [ posterior['shape_M12_b'] for i in range(nMultilocus) ]
+			shape_M21_a = [ posterior['shape_M21_a'] for i in range(nMultilocus) ]
+			shape_M21_b = [ posterior['shape_M21_b'] for i in range(nMultilocus) ]
+		else:
+			M12 = [0]*nMultilocus
+			M21 = [0]*nMultilocus
+			shape_M12_a = [0]*nMultilocus
+			shape_M12_b = [0]*nMultilocus
+			shape_M21_a = [0]*nMultilocus
+			shape_M21_b = [0]*nMultilocus
 
-	if AC == '1':
-		M13 = [ posterior['M13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		M31 = [ posterior['M31'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M13_a = [ posterior['shape_M13_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M13_b = [ posterior['shape_M13_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M31_a = [ posterior['shape_M31_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M31_b = [ posterior['shape_M31_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	else:
-		M13 = [0]*nMultilocus
-		M31 = [0]*nMultilocus
-		shape_M13_a = [0]*nMultilocus
-		shape_M13_b = [0]*nMultilocus
-		shape_M31_a = [0]*nMultilocus
-		shape_M31_b = [0]*nMultilocus
+		if AC == '1':
+			M13 = [ posterior['M13'] for i in range(nMultilocus) ]
+			M31 = [ posterior['M31'] for i in range(nMultilocus) ]
+			shape_M13_a = [ posterior['shape_M13_a'] for i in range(nMultilocus) ]
+			shape_M13_b = [ posterior['shape_M13_b'] for i in range(nMultilocus) ]
+			shape_M31_a = [ posterior['shape_M31_a'] for i in range(nMultilocus) ]
+			shape_M31_b = [ posterior['shape_M31_b'] for i in range(nMultilocus) ]
+		else:
+			M13 = [0]*nMultilocus
+			M31 = [0]*nMultilocus
+			shape_M13_a = [0]*nMultilocus
+			shape_M13_b = [0]*nMultilocus
+			shape_M31_a = [0]*nMultilocus
+			shape_M31_b = [0]*nMultilocus
 
-	if AD == '1':
-		M14 = [ posterior['M14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		M41 = [ posterior['M41'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M14_a = [ posterior['shape_M14_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M14_b = [ posterior['shape_M14_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M41_a = [ posterior['shape_M41_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M41_b = [ posterior['shape_M41_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	else:
-		M14 = [0]*nMultilocus
-		M41 = [0]*nMultilocus
-		shape_M14_a = [0]*nMultilocus
-		shape_M14_b = [0]*nMultilocus
-		shape_M41_a = [0]*nMultilocus
-		shape_M41_b = [0]*nMultilocus
+		if AD == '1':
+			M14 = [ posterior['M14'] for i in range(nMultilocus) ]
+			M41 = [ posterior['M41'] for i in range(nMultilocus) ]
+			shape_M14_a = [ posterior['shape_M14_a'] for i in range(nMultilocus) ]
+			shape_M14_b = [ posterior['shape_M14_b'] for i in range(nMultilocus) ]
+			shape_M41_a = [ posterior['shape_M41_a'] for i in range(nMultilocus) ]
+			shape_M41_b = [ posterior['shape_M41_b'] for i in range(nMultilocus) ]
+		else:
+			M14 = [0]*nMultilocus
+			M41 = [0]*nMultilocus
+			shape_M14_a = [0]*nMultilocus
+			shape_M14_b = [0]*nMultilocus
+			shape_M41_a = [0]*nMultilocus
+			shape_M41_b = [0]*nMultilocus
 
-	if BC == '1':
-		M23 = [ posterior['M23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		M32 = [ posterior['M32'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M23_a = [ posterior['shape_M23_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M23_b = [ posterior['shape_M23_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M32_a = [ posterior['shape_M32_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M32_b = [ posterior['shape_M32_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	else:
-		M23 = [0]*nMultilocus
-		M32 = [0]*nMultilocus
-		shape_M32_a = [0]*nMultilocus
-		shape_M32_b = [0]*nMultilocus
-		shape_M23_a = [0]*nMultilocus
-		shape_M23_b = [0]*nMultilocus
+		if BC == '1':
+			M23 = [ posterior['M23'] for i in range(nMultilocus) ]
+			M32 = [ posterior['M32'] for i in range(nMultilocus) ]
+			shape_M23_a = [ posterior['shape_M23_a'] for i in range(nMultilocus) ]
+			shape_M23_b = [ posterior['shape_M23_b'] for i in range(nMultilocus) ]
+			shape_M32_a = [ posterior['shape_M32_a'] for i in range(nMultilocus) ]
+			shape_M32_b = [ posterior['shape_M32_b'] for i in range(nMultilocus) ]
+		else:
+			M23 = [0]*nMultilocus
+			M32 = [0]*nMultilocus
+			shape_M32_a = [0]*nMultilocus
+			shape_M32_b = [0]*nMultilocus
+			shape_M23_a = [0]*nMultilocus
+			shape_M23_b = [0]*nMultilocus
 
-	if BD == '1':
-		M24 = [ posterior['M24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		M42 = [ posterior['M42'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M24_a = [ posterior['shape_M24_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M24_b = [ posterior['shape_M24_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M42_a = [ posterior['shape_M42_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M42_b = [ posterior['shape_M42_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-	else:
-		M24 = [0]*nMultilocus
-		M42 = [0]*nMultilocus
-		shape_M24_a = [0]*nMultilocus
-		shape_M24_b = [0]*nMultilocus
-		shape_M42_a = [0]*nMultilocus
-		shape_M42_b = [0]*nMultilocus
+		if BD == '1':
+			M24 = [ posterior['M24'] for i in range(nMultilocus) ]
+			M42 = [ posterior['M42'] for i in range(nMultilocus) ]
+			shape_M24_a = [ posterior['shape_M24_a'] for i in range(nMultilocus) ]
+			shape_M24_b = [ posterior['shape_M24_b'] for i in range(nMultilocus) ]
+			shape_M42_a = [ posterior['shape_M42_a'] for i in range(nMultilocus) ]
+			shape_M42_b = [ posterior['shape_M42_b'] for i in range(nMultilocus) ]
+		else:
+			M24 = [0]*nMultilocus
+			M42 = [0]*nMultilocus
+			shape_M24_a = [0]*nMultilocus
+			shape_M24_b = [0]*nMultilocus
+			shape_M42_a = [0]*nMultilocus
+			shape_M42_b = [0]*nMultilocus
 
-	if CD == '1':
-		M34 = [ posterior['M34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		M43 = [ posterior['M43'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M34_a = [ posterior['shape_M34_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M34_b = [ posterior['shape_M34_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M43_a = [ posterior['shape_M43_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		shape_M43_b = [ posterior['shape_M43_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		if CD == '1':
+			M34 = [ posterior['M34'] for i in range(nMultilocus) ]
+			M43 = [ posterior['M43'] for i in range(nMultilocus) ]
+			shape_M34_a = [ posterior['shape_M34_a'] for i in range(nMultilocus) ]
+			shape_M34_b = [ posterior['shape_M34_b'] for i in range(nMultilocus) ]
+			shape_M43_a = [ posterior['shape_M43_a'] for i in range(nMultilocus) ]
+			shape_M43_b = [ posterior['shape_M43_b'] for i in range(nMultilocus) ]
+		else:
+			M34 = [0]*nMultilocus
+			M43 = [0]*nMultilocus
+			shape_M34_a = [0]*nMultilocus
+			shape_M34_b = [0]*nMultilocus
+			shape_M43_a = [0]*nMultilocus
+			shape_M43_b = [0]*nMultilocus
+	
 	else:
-		M34 = [0]*nMultilocus
-		M43 = [0]*nMultilocus
-		shape_M34_a = [0]*nMultilocus
-		shape_M34_b = [0]*nMultilocus
-		shape_M43_a = [0]*nMultilocus
-		shape_M43_b = [0]*nMultilocus
+		if AB == '1':
+			M12 = [ posterior['M12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			M21 = [ posterior['M21'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M12_a = [ posterior['shape_M12_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M12_b = [ posterior['shape_M12_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M21_a = [ posterior['shape_M21_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M21_b = [ posterior['shape_M21_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		else:
+			M12 = [0]*nMultilocus
+			M21 = [0]*nMultilocus
+			shape_M12_a = [0]*nMultilocus
+			shape_M12_b = [0]*nMultilocus
+			shape_M21_a = [0]*nMultilocus
+			shape_M21_b = [0]*nMultilocus
+
+		if AC == '1':
+			M13 = [ posterior['M13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			M31 = [ posterior['M31'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M13_a = [ posterior['shape_M13_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M13_b = [ posterior['shape_M13_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M31_a = [ posterior['shape_M31_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M31_b = [ posterior['shape_M31_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		else:
+			M13 = [0]*nMultilocus
+			M31 = [0]*nMultilocus
+			shape_M13_a = [0]*nMultilocus
+			shape_M13_b = [0]*nMultilocus
+			shape_M31_a = [0]*nMultilocus
+			shape_M31_b = [0]*nMultilocus
+
+		if AD == '1':
+			M14 = [ posterior['M14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			M41 = [ posterior['M41'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M14_a = [ posterior['shape_M14_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M14_b = [ posterior['shape_M14_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M41_a = [ posterior['shape_M41_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M41_b = [ posterior['shape_M41_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		else:
+			M14 = [0]*nMultilocus
+			M41 = [0]*nMultilocus
+			shape_M14_a = [0]*nMultilocus
+			shape_M14_b = [0]*nMultilocus
+			shape_M41_a = [0]*nMultilocus
+			shape_M41_b = [0]*nMultilocus
+
+		if BC == '1':
+			M23 = [ posterior['M23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			M32 = [ posterior['M32'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M23_a = [ posterior['shape_M23_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M23_b = [ posterior['shape_M23_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M32_a = [ posterior['shape_M32_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M32_b = [ posterior['shape_M32_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		else:
+			M23 = [0]*nMultilocus
+			M32 = [0]*nMultilocus
+			shape_M32_a = [0]*nMultilocus
+			shape_M32_b = [0]*nMultilocus
+			shape_M23_a = [0]*nMultilocus
+			shape_M23_b = [0]*nMultilocus
+
+		if BD == '1':
+			M24 = [ posterior['M24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			M42 = [ posterior['M42'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M24_a = [ posterior['shape_M24_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M24_b = [ posterior['shape_M24_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M42_a = [ posterior['shape_M42_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M42_b = [ posterior['shape_M42_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		else:
+			M24 = [0]*nMultilocus
+			M42 = [0]*nMultilocus
+			shape_M24_a = [0]*nMultilocus
+			shape_M24_b = [0]*nMultilocus
+			shape_M42_a = [0]*nMultilocus
+			shape_M42_b = [0]*nMultilocus
+
+		if CD == '1':
+			M34 = [ posterior['M34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			M43 = [ posterior['M43'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M34_a = [ posterior['shape_M34_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M34_b = [ posterior['shape_M34_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M43_a = [ posterior['shape_M43_a'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			shape_M43_b = [ posterior['shape_M43_b'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+		else:
+			M34 = [0]*nMultilocus
+			M43 = [0]*nMultilocus
+			shape_M34_a = [0]*nMultilocus
+			shape_M34_b = [0]*nMultilocus
+			shape_M43_a = [0]*nMultilocus
+			shape_M43_b = [0]*nMultilocus
 else:
 	if AB == '1':
 		M12 = uniform(low = min(M_bound), high = max(M_bound), size = nMultilocus)
@@ -423,51 +535,95 @@ else:
 ## times
 epsilon = 0.00001
 
-if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5']:
-	Tsplit = [ posterior['Tsplit'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof']:
+	if target == 'gof':
+		Tsplit = [ posterior['Tsplit'] for i in range(nMultilocus) ]
+	else:
+		Tsplit = [ posterior['Tsplit'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+
 else:
 	Tsplit = uniform(low = T_bound[0], high = T_bound[1], size = nMultilocus)
 
 if model == 'topo1':
-	if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5']:
-		Tsplit_24 = [ posterior['Tsplit_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # [ uniform(low = T_bound[0], high = time_space*Tsplit[i], size = None) for i in range(nMultilocus) ] # crx
-		Tsplit_24 = [ Tsplit_24[i] if Tsplit_24[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
-		Tsplit_23 = [ posterior['Tsplit_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ] # crx
-		Tsplit_23 = [ Tsplit_23[i] if Tsplit_23[i]<Tsplit_24[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
-		if AB == '1':
-			Tsc_12 = [ posterior['Tsc_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_12 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+	if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof']:
+		if target == 'gof':
+			Tsplit_24 = [ posterior['Tsplit_24']  for i in range(nMultilocus) ]
+			Tsplit_24 = [ Tsplit_24[i] if Tsplit_24[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			Tsplit_23 = [ posterior['Tsplit_23']  for i in range(nMultilocus) ]
+			Tsplit_23 = [ Tsplit_23[i] if Tsplit_23[i]<Tsplit_24[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			if AB == '1':
+				Tsc_12 = [ posterior['Tsc_12']  for i in range(nMultilocus) ]
+				Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_12 = [0] * nMultilocus
+			if AC == '1':
+	#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ posterior['Tsc_13']  for i in range(nMultilocus) ]
+				Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_13 = [0] * nMultilocus
+			if AD == '1':
+	#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ posterior['Tsc_14']  for i in range(nMultilocus) ]
+				Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<Tsplit_23[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_14 = [0] * nMultilocus
+			if BC == '1':
+	#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ posterior['Tsc_23']  for i in range(nMultilocus) ]
+				Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_23 = [0] * nMultilocus
+			if BD == '1':
+	#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
+				Tsc_24 = [ posterior['Tsc_24']  for i in range(nMultilocus) ]
+				Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_24 = [0] * nMultilocus
+			if CD == '1':
+				Tsc_34 = [ posterior['Tsc_34']  for i in range(nMultilocus) ]
+				Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_34 = [0] * nMultilocus
 		else:
-			Tsc_12 = [0] * nMultilocus
-		if AC == '1':
-#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_13 = [ posterior['Tsc_13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_13 = [0] * nMultilocus
-		if AD == '1':
-#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
-			Tsc_14 = [ posterior['Tsc_14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<Tsplit_23[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_14 = [0] * nMultilocus
-		if BC == '1':
-#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_23 = [ posterior['Tsc_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_23 = [0] * nMultilocus
-		if BD == '1':
-#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
-			Tsc_24 = [ posterior['Tsc_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_24 = [0] * nMultilocus
-		if CD == '1':
-			Tsc_34 = [ posterior['Tsc_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_34 = [0] * nMultilocus
+			Tsplit_24 = [ posterior['Tsplit_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # [ uniform(low = T_bound[0], high = time_space*Tsplit[i], size = None) for i in range(nMultilocus) ] # crx
+			Tsplit_24 = [ Tsplit_24[i] if Tsplit_24[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			Tsplit_23 = [ posterior['Tsplit_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ] # crx
+			Tsplit_23 = [ Tsplit_23[i] if Tsplit_23[i]<Tsplit_24[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			if AB == '1':
+				Tsc_12 = [ posterior['Tsc_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_12 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_12 = [0] * nMultilocus
+			if AC == '1':
+	#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ posterior['Tsc_13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_13 = [0] * nMultilocus
+			if AD == '1':
+	#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ posterior['Tsc_14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<Tsplit_23[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_14 = [0] * nMultilocus
+			if BC == '1':
+	#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ posterior['Tsc_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_23 = [0] * nMultilocus
+			if BD == '1':
+	#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
+				Tsc_24 = [ posterior['Tsc_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_24 = [0] * nMultilocus
+			if CD == '1':
+				Tsc_34 = [ posterior['Tsc_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<Tsplit_23[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_34 = [0] * nMultilocus
 	else:
 		Tsplit_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit[i], size = None) for i in range(nMultilocus) ] # crx
 		Tsplit_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ] # crx
@@ -497,45 +653,86 @@ if model == 'topo1':
 			Tsc_34 = [0] * nMultilocus
 
 if model == 'topo2':
-	if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5']:
-		Tsplit_24 = [ posterior['Tsplit_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		Tsplit_24 = [ Tsplit_24[i] if Tsplit_24[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
-		Tsplit_34 = [ posterior['Tsplit_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		Tsplit_34 = [ Tsplit_34[i] if Tsplit_34[i]<Tsplit_24[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
-		if AB == '1':
-			Tsc_12 = [ posterior['Tsc_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_12 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_24[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+	if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof']:
+		if target == 'gof':
+			Tsplit_24 = [ posterior['Tsplit_24'] for i in range(nMultilocus) ]
+			Tsplit_24 = [ Tsplit_24[i] if Tsplit_24[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			Tsplit_34 = [ posterior['Tsplit_34'] for i in range(nMultilocus) ]
+			Tsplit_34 = [ Tsplit_34[i] if Tsplit_34[i]<Tsplit_24[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			if AB == '1':
+				Tsc_12 = [ posterior['Tsc_12'] for i in range(nMultilocus) ]
+				Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_24[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_12 = [0] * nMultilocus
+			if AC == '1':
+	#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ posterior['Tsc_13'] for i in range(nMultilocus) ]
+				Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_13 = [0] * nMultilocus
+			if AD == '1':
+	#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ posterior['Tsc_14'] for i in range(nMultilocus) ]
+				Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<Tsplit_34[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_14 = [0] * nMultilocus
+			if BC == '1':
+	#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ posterior['Tsc_23'] for i in range(nMultilocus) ]
+				Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_23 = [0] * nMultilocus
+			if BD == '1':
+	#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
+				Tsc_24 = [ posterior['Tsc_24'] for i in range(nMultilocus) ]
+				Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_24 = [0] * nMultilocus
+			if CD == '1':
+				Tsc_34 = [ posterior['Tsc_34'] for i in range(nMultilocus) ]
+				Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_34 = [0] * nMultilocus
+
 		else:
-			Tsc_12 = [0] * nMultilocus
-		if AC == '1':
-#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_13 = [ posterior['Tsc_13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_13 = [0] * nMultilocus
-		if AD == '1':
-#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
-			Tsc_14 = [ posterior['Tsc_14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<Tsplit_34[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_14 = [0] * nMultilocus
-		if BC == '1':
-#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_23 = [ posterior['Tsc_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_23 = [0] * nMultilocus
-		if BD == '1':
-#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
-			Tsc_24 = [ posterior['Tsc_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_24 = [0] * nMultilocus
-		if CD == '1':
-			Tsc_34 = [ posterior['Tsc_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_34 = [0] * nMultilocus
+			Tsplit_24 = [ posterior['Tsplit_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			Tsplit_24 = [ Tsplit_24[i] if Tsplit_24[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			Tsplit_34 = [ posterior['Tsplit_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			Tsplit_34 = [ Tsplit_34[i] if Tsplit_34[i]<Tsplit_24[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			if AB == '1':
+				Tsc_12 = [ posterior['Tsc_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_12 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_24[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_12 = [0] * nMultilocus
+			if AC == '1':
+	#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ posterior['Tsc_13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_13 = [0] * nMultilocus
+			if AD == '1':
+	#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ posterior['Tsc_14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<Tsplit_34[i] else Tsplit_24[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_14 = [0] * nMultilocus
+			if BC == '1':
+	#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ posterior['Tsc_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_23 = [0] * nMultilocus
+			if BD == '1':
+	#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
+				Tsc_24 = [ posterior['Tsc_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_24 = [0] * nMultilocus
+			if CD == '1':
+				Tsc_34 = [ posterior['Tsc_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<Tsplit_34[i] else Tsplit_23[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_34 = [0] * nMultilocus
 	else:
 		Tsplit_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit[i], size = None) for i in range(nMultilocus) ]
 		Tsplit_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
@@ -565,45 +762,85 @@ if model == 'topo2':
 			Tsc_34 = [0] * nMultilocus
 
 if model == 'topo3':
-	if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5']:
-		Tsplit_12 = [ posterior['Tsplit_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		Tsplit_12 = [ Tsplit_12[i] if Tsplit_12[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
-		Tsplit_34 = [ posterior['Tsplit_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
-		Tsplit_34 = [ Tsplit_34[i] if Tsplit_34[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
-		if AB == '1':
-			Tsc_12 = [ posterior['Tsc_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_12 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_24[i] else Tsplit_12[i]-epsilon for i in range(nMultilocus) ]
+	if target in ['opti1', 'opti2', 'opti3', 'opti4', 'opti5', 'gof']:
+		if target == 'gof':
+			Tsplit_12 = [ posterior['Tsplit_12'] for i in range(nMultilocus) ]
+			Tsplit_12 = [ Tsplit_12[i] if Tsplit_12[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			Tsplit_34 = [ posterior['Tsplit_34'] for i in range(nMultilocus) ]
+			Tsplit_34 = [ Tsplit_34[i] if Tsplit_34[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			if AB == '1':
+				Tsc_12 = [ posterior['Tsc_12'] for i in range(nMultilocus) ]
+				Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_24[i] else Tsplit_12[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_12 = [0] * nMultilocus
+			if AC == '1':
+	#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ posterior['Tsc_13'] for i in range(nMultilocus) ]
+				Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_34[i] else Tsplit_34[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_13 = [0] * nMultilocus
+			if AD == '1':
+	#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ posterior['Tsc_14'] for i in range(nMultilocus) ]
+				Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_14 = [0] * nMultilocus
+			if BC == '1':
+	#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ posterior['Tsc_23'] for i in range(nMultilocus) ]
+				Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_23 = [0] * nMultilocus
+			if BD == '1':
+	#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
+				Tsc_24 = [ posterior['Tsc_24'] for i in range(nMultilocus) ]
+				Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_24 = [0] * nMultilocus
+			if CD == '1':
+				Tsc_34 = [ posterior['Tsc_34'] for i in range(nMultilocus) ]
+				Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_34 = [0] * nMultilocus
 		else:
-			Tsc_12 = [0] * nMultilocus
-		if AC == '1':
-#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_13 = [ posterior['Tsc_13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_34[i] else Tsplit_34[i]-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_13 = [0] * nMultilocus
-		if AD == '1':
-#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
-			Tsc_14 = [ posterior['Tsc_14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_14 = [0] * nMultilocus
-		if BC == '1':
-#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_23 = [ posterior['Tsc_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_23 = [0] * nMultilocus
-		if BD == '1':
-#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
-			Tsc_24 = [ posterior['Tsc_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_24 = [0] * nMultilocus
-		if CD == '1':
-			Tsc_34 = [ posterior['Tsc_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
-			Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
-		else:
-			Tsc_34 = [0] * nMultilocus
+			Tsplit_12 = [ posterior['Tsplit_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			Tsplit_12 = [ Tsplit_12[i] if Tsplit_12[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			Tsplit_34 = [ posterior['Tsplit_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ]
+			Tsplit_34 = [ Tsplit_34[i] if Tsplit_34[i]<Tsplit[i] else Tsplit[i]-epsilon for i in range(nMultilocus) ]
+			if AB == '1':
+				Tsc_12 = [ posterior['Tsc_12'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_12 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_12 = [ Tsc_12[i] if Tsc_12[i]<Tsplit_24[i] else Tsplit_12[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_12 = [0] * nMultilocus
+			if AC == '1':
+	#			Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ posterior['Tsc_13'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_13 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_13 = [ Tsc_13[i] if Tsc_13[i]<Tsplit_34[i] else Tsplit_34[i]-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_13 = [0] * nMultilocus
+			if AD == '1':
+	#			Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_24[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ posterior['Tsc_14'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_14 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_14 = [ Tsc_14[i] if Tsc_14[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_14 = [0] * nMultilocus
+			if BC == '1':
+	#			Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ posterior['Tsc_23'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_23 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_23 = [ Tsc_23[i] if Tsc_23[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_23 = [0] * nMultilocus
+			if BD == '1':
+	#			Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ] # maintenant limite par Tsplit_34 et non plus Tsplit_24
+				Tsc_24 = [ posterior['Tsc_24'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_24 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_24 = [ Tsc_24[i] if Tsc_24[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_24 = [0] * nMultilocus
+			if CD == '1':
+				Tsc_34 = [ posterior['Tsc_34'] * i/0.5 for i in beta(a=shapeOpti, b=shapeOpti, size=nMultilocus) ] # Tsc_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit_23[i], size = None) for i in range(nMultilocus) ]
+				Tsc_34 = [ Tsc_34[i] if Tsc_34[i]<min([Tsplit_12[i], Tsplit_34[i]]) else min([Tsplit_12[i], Tsplit_34[i]])-epsilon for i in range(nMultilocus) ]
+			else:
+				Tsc_34 = [0] * nMultilocus
 	else:
 		Tsplit_12 = [ uniform(low = T_bound[0], high = time_space*Tsplit[i], size = None) for i in range(nMultilocus) ]
 		Tsplit_34 = [ uniform(low = T_bound[0], high = time_space*Tsplit[i], size = None) for i in range(nMultilocus) ]
