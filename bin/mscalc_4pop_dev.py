@@ -629,6 +629,37 @@ def ABBA_BABA(spA, spB, spC, spD):
 	return(res)
 
 
+# SFS 4D
+def categorise_frequence(f):
+	# =0; ]0, 0.05]; ]0.05, 0.25]; ]0.25, 1[; =1
+	if f == 0:
+		return 0
+	elif 0 < f <= 0.05:
+		return 1
+	elif 0.05 < f <= 0.25:
+		return 2
+	elif 0.25 < f < 1:
+		return 3
+	elif f == 1:
+		return 4
+	else:
+		raise ValueError("Frequency must be between 0 and 1 included")
+
+# Function to get allele frequencies
+def get_frequencies(aln):
+	# pure Python
+	aln_list = [list(map(int, seq)) for seq in aln]
+	frequencies = []
+	for i in range(len(aln_list[0])):  # Assuming all sequences are the same length
+		sum_ones = sum(aln_list[j][i] for j in range(len(aln)))
+		frequencies.append(sum_ones / len(aln))
+	return frequencies
+
+# Function to update the spectrum with the frequency of a new SNP
+def update_spectrum(frequencies):
+    indices = [categorise_frequence(f) for f in frequencies]
+    # Navigate through the nested list to increment the counter
+    sfs[indices[0]][indices[1]][indices[2]][indices[3]] += 1
 # read information about loci from the bpfile 
 if os.path.isfile("{datapath}/bpfile".format(datapath=datapath)) == False:
 	sys.exit("\n\t\033[1;31;40mERROR: bpfile was not found\n\033[0m\n")
@@ -795,7 +826,14 @@ res += 'fhom_DC_A_avg\tfhom_DC_A_std\t'
 res += 'D_DC_B_avg\tD_DC_B_std\t'
 res += 'D_negOne_DC_B\tD_posOne_DC_B\t'
 res += 'fd_DC_B_avg\tfd_DC_B_std\t'
-res += 'fhom_DC_B_avg\tfhom_DC_B_std\n'
+res += 'fhom_DC_B_avg\tfhom_DC_B_std\t'
+
+for i in range(5):
+	for j in range(5):
+		for k in range(5):
+			for l in range(5):
+				res += "b{}_{}_{}_{}\t".format(i, j, k, l)
+res = res.strip() + '\n'
 outfile.write(res)
 
 #infile = open(msfile, "r")
@@ -830,7 +868,10 @@ for line in sys.stdin: # read the ms's output from the stdin
 			D_AB_C, D_AB_D, D_BA_C, D_BA_D, D_CD_A, D_CD_B, D_DC_A, D_DC_B = [], [], [], [], [], [], [], []
 			fd_AB_C, fd_AB_D, fd_BA_C, fd_BA_D, fd_CD_A, fd_CD_B, fd_DC_A, fd_DC_B = [], [], [], [], [], [], [], []
 			fhom_AB_C, fhom_AB_D, fhom_BA_C, fhom_BA_D, fhom_CD_A, fhom_CD_B, fhom_DC_A, fhom_DC_B = [], [], [], [], [], [], [], []
-		
+			
+			# SFS 4D
+			sfs = [[[[0 for _ in range(5)] for _ in range(5)] for _ in range(5)] for _ in range(5)]
+
 		nLoci_cnt += 1
 		nSam_cnt = 0 # count the number of treated individuals within a locus
 		test = 1
@@ -1195,6 +1236,13 @@ for line in sys.stdin: # read the ms's output from the stdin
 					fhom_CD_B.append(ABBA_BABA_CD_B['fhom'])
 					fhom_DC_A.append(ABBA_BABA_DC_A['fhom'])
 					fhom_DC_B.append(ABBA_BABA_DC_B['fhom'])
+					
+					# SFS 4D
+					all_frequencies = [get_frequencies(sp) for sp in [spA, spB, spC, spD]]
+					
+					# Update the SFS
+					for SNP_i in range(len(all_frequencies[0])):
+						update_spectrum([sp[SNP_i] for sp in all_frequencies])
 				
 	# compute average and std over of statistics over loci
 	if nLoci_cnt != 0 and len(sxA) == nLoci:
@@ -1560,7 +1608,11 @@ for line in sys.stdin: # read the ms's output from the stdin
 		res += "{0:.5f}\t{1:.5f}\t".format(D_DC_B_avg, D_DC_B_std)
 		res += "{0:.5f}\t{1:.5f}\t".format(D_DC_B.count(-1), D_DC_B.count(1))
 		res += "{0:.5f}\t{1:.5f}\t".format(fd_DC_B_avg, fd_DC_B_std)
-		res += "{0:.5f}\t{1:.5f}".format(fhom_DC_B_avg, fhom_DC_B_std)
+		res += "{0:.5f}\t{1:.5f}\t".format(fhom_DC_B_avg, fhom_DC_B_std)
+
+		# DISPLAY THE SPECTRUM 
+		vectorized_sfs = [str(sfs[i][j][k][l]) for i in range(5) for j in range(5) for k in range(5) for l in range(5)]
+		res += '\t'.join(vectorized_sfs) + '\n'
 
 		#res += "{0:.5f}\t".format(pearson_r_div_netDiv)
 		#res += "{0:.5f}\t".format(pearson_r_div_FST)
