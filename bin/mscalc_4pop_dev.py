@@ -1,17 +1,8 @@
-#!/usr/bin/env pypy
-
-# #!/gpfs/fs1/home/b/blouis/quentin/env_abc/pypy3.7-v7.3.5-linux64/bin/pypy3
-# #!/usr/bin/pypy
-
-
-# #!/usr/bin/pypy
-
-
-
-# assumes four populations with the following species tree:
-# ((A,B), (C,D))
 import os
 import sys
+
+# number of bins of frequencies for the 4D SFS
+nBinFreq = 5
 
 datapath = None
 simulationpath = None
@@ -631,14 +622,15 @@ def ABBA_BABA(spA, spB, spC, spD):
 
 # SFS 4D
 def categorise_frequence(f):
-	# =0; ]0, 0.05]; ]0.05, 0.25]; ]0.25, 1[; =1
+	# 5  bins of frequencies for the 4D SFS
+	# =0; ]0, 1/3]; ]1/3, 2/3]; ]2/3, 1[; =1
 	if f == 0:
 		return 0
-	elif 0 < f <= 0.05:
+	elif 0 < f <= 1/3:
 		return 1
-	elif 0.05 < f <= 0.25:
+	elif 1/3 < f <= 2/3:
 		return 2
-	elif 0.25 < f < 1:
+	elif 2/3 < f < 1:
 		return 3
 	elif f == 1:
 		return 4
@@ -828,10 +820,10 @@ res += 'D_negOne_DC_B\tD_posOne_DC_B\t'
 res += 'fd_DC_B_avg\tfd_DC_B_std\t'
 res += 'fhom_DC_B_avg\tfhom_DC_B_std\t'
 
-for i in range(5):
-	for j in range(5):
-		for k in range(5):
-			for l in range(5):
+for i in range(nBinFreq):
+	for j in range(nBinFreq):
+		for k in range(nBinFreq):
+			for l in range(nBinFreq):
 				res += "b{}_{}_{}_{}\t".format(i, j, k, l)
 res = res.strip() + '\n'
 outfile.write(res)
@@ -870,7 +862,7 @@ for line in sys.stdin: # read the ms's output from the stdin
 			fhom_AB_C, fhom_AB_D, fhom_BA_C, fhom_BA_D, fhom_CD_A, fhom_CD_B, fhom_DC_A, fhom_DC_B = [], [], [], [], [], [], [], []
 			
 			# SFS 4D
-			sfs = [[[[0 for _ in range(5)] for _ in range(5)] for _ in range(5)] for _ in range(5)]
+			sfs = [[[[0 for _ in range(nBinFreq)] for _ in range(nBinFreq)] for _ in range(nBinFreq)] for _ in range(nBinFreq)]
 
 		nLoci_cnt += 1
 		nSam_cnt = 0 # count the number of treated individuals within a locus
